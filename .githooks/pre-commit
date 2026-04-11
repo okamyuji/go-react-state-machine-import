@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# pre-commit hook は bin/quality を実行して、フォーマット・静的解析・テスト・
+# ビルドが全部通ることを確認してからコミットを許可します。
+
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+exec "$ROOT/bin/quality"

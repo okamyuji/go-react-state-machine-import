@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# bin/quality はバックエンド（Go）とフロントエンド（React/TS）の品質検証を
+# 1コマンドで通すランナーです。pre-commit フックからも呼ばれます。
+# どれか1つでも失敗すると非ゼロで終了します。
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+banner() {
+  printf '\n==== %s ====\n' "$1"
+}
+
+# --- Go ---
+banner "Go: gofmt"
+GOFMT_FILES=$(gofmt -l backend)
+if [[ -n "$GOFMT_FILES" ]]; then
+  echo "フォーマット未整形のファイル:"
+  echo "$GOFMT_FILES"
+  exit 1
+fi
+
+banner "Go: go vet"
+(cd backend && go vet ./...)
+
+banner "Go: staticcheck"
+(cd backend && staticcheck ./...)
+
+banner "Go: golangci-lint"
+(cd backend && golangci-lint run ./...)
+
+banner "Go: go test -count=3 -race"
+(cd backend && go test -count=3 -race ./...)
+
+banner "Go: go build"
+(cd backend && go build ./...)
+
+# --- Frontend ---
+banner "Frontend: prettier --check"
+(cd frontend && pnpm run format:check)
+
+banner "Frontend: eslint"
+(cd frontend && pnpm run lint)
+
+banner "Frontend: tsc typecheck"
+(cd frontend && pnpm run typecheck)
+
+banner "Frontend: vitest"
+(cd frontend && pnpm test)
+
+banner "Frontend: vite build"
+(cd frontend && pnpm run build)
+
+printf '\n✅ すべての品質検証を通過しました\n'

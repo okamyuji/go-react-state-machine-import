@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# bin/setup_hooks は git pre-commit フックを有効化するスクリプトです。
+# `git config core.hooksPath .githooks` を実行し、bin/quality が
+# コミット前に自動実行されるように設定します。
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+git config core.hooksPath .githooks
+chmod +x .githooks/pre-commit bin/quality bin/setup_hooks
+
+printf '✅ pre-commit フックを有効化しました (.githooks/pre-commit)\n'
