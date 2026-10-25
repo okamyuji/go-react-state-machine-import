@@ -1,3 +1,3 @@
 module github.com/okamyuji/go-react-state-machine-import/backend
 
-go 1.26
+go 1.26.10
