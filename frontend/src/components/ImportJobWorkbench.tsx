@@ -36,22 +36,26 @@ export function ImportJobWorkbench({ deps = defaultDeps }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // refreshは依存配列からselectedIDを外し、関数が再生成されないようにしています。
-  // こうしないと選択変更のたびにuseEffectが走ってlist() が呼ばれ、
-  // 楽観更新したjobsがサーバ応答で上書きされてしまいます。
-  const refresh = useCallback(async () => {
-    try {
-      const list = await deps.list();
-      setJobs(list);
-      setSelectedID((prev) => prev ?? list[0]?.id ?? null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    }
-  }, [deps]);
-
+  // 取得処理はeffect内に置き、setStateを非同期の継続だけで呼びます。
+  // selectedIDを依存に入れないのは、選択変更のたびにlist()が走り、
+  // 楽観更新したjobsがサーバ応答で上書きされるのを防ぐためです。
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    let cancelled = false;
+    deps
+      .list()
+      .then((list) => {
+        if (cancelled) return;
+        setJobs(list);
+        setSelectedID((prev) => prev ?? list[0]?.id ?? null);
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        setError(e instanceof Error ? e.message : String(e));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [deps]);
 
   const selected = jobs.find((j) => j.id === selectedID) ?? null;
 
