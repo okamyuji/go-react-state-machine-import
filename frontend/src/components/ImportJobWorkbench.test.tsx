@@ -34,6 +34,62 @@ describe("ImportJobWorkbench", () => {
     expect(within(sidebar).getByText("job-1")).toBeInTheDocument();
   });
 
+  it("一覧の取得に失敗するとエラーを表示する", async () => {
+    const deps = {
+      list: vi.fn().mockRejectedValue(new Error("network down")),
+      create: vi.fn(),
+      apply: vi.fn(),
+    };
+    render(<ImportJobWorkbench deps={deps} />);
+    expect(await screen.findByText("network down")).toBeInTheDocument();
+  });
+
+  it("deps が差し替わると古い取得の結果を捨てる", async () => {
+    let resolveOld: (jobs: Job[]) => void = () => {};
+    const oldDeps = {
+      list: vi.fn(
+        () => new Promise<Job[]>((resolve) => (resolveOld = resolve)),
+      ),
+      create: vi.fn(),
+      apply: vi.fn(),
+    };
+    const newDeps = {
+      list: vi.fn().mockResolvedValue([makeJob({ id: "job-new" })]),
+      create: vi.fn(),
+      apply: vi.fn(),
+    };
+    const { rerender } = render(<ImportJobWorkbench deps={oldDeps} />);
+    rerender(<ImportJobWorkbench deps={newDeps} />);
+    const sidebar = await screen.findByRole("list", { name: "ジョブ一覧" });
+    await within(sidebar).findByText("job-new");
+    resolveOld([makeJob({ id: "job-old" })]);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(within(sidebar).queryByText("job-old")).not.toBeInTheDocument();
+  });
+
+  it("deps が差し替わると古い取得の失敗を表示しない", async () => {
+    let rejectOld: (e: Error) => void = () => {};
+    const oldDeps = {
+      list: vi.fn(
+        () => new Promise<Job[]>((_, reject) => (rejectOld = reject)),
+      ),
+      create: vi.fn(),
+      apply: vi.fn(),
+    };
+    const newDeps = {
+      list: vi.fn().mockResolvedValue([makeJob({ id: "job-new" })]),
+      create: vi.fn(),
+      apply: vi.fn(),
+    };
+    const { rerender } = render(<ImportJobWorkbench deps={oldDeps} />);
+    rerender(<ImportJobWorkbench deps={newDeps} />);
+    const sidebar = await screen.findByRole("list", { name: "ジョブ一覧" });
+    await within(sidebar).findByText("job-new");
+    rejectOld(new Error("stale failure"));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(screen.queryByText("stale failure")).not.toBeInTheDocument();
+  });
+
   it("ジョブを作成すると一覧の先頭に追加される", async () => {
     const created = makeJob({ id: "job-new", filename: "new.csv" });
     const deps = {
