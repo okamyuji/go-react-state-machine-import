@@ -68,7 +68,7 @@ go-react-state-machine-import/
 
 - Go 1.22 以上 (1.26 で動作確認)
 - Node.js 20 以上
-- `pnpm` (`corepack enable` で`packageManager`の版が入ります)
+- `pnpm` (`corepack enable`で`packageManager`の版が入ります)
 - `staticcheck` (`go install honnef.co/go/tools/cmd/staticcheck@latest`)
 - `golangci-lint` (https://golangci-lint.run/usage/install/)
 
