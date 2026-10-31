@@ -22,7 +22,7 @@ CSVインポートジョブを題材に、**13状態 × 15イベント × 23本�
 | フロントエンド | React 19 + Vite + TypeScript | `react`, `react-dom` のみ (state管理ライブラリ不使用) |
 | スタイリング | plain CSS | なし |
 | 品質検証 (Go) | `gofmt`, `go vet`, `staticcheck`, `golangci-lint`, `go test -count=3 -race`, `go build` | - |
-| 品質検証 (React) | `prettier`, `eslint`, `tsc --noEmit`, `vitest`, `vite build` | - |
+| 品質検証 (React) | `oxfmt`, `oxlint`, `tsc --noEmit`, `vitest`, `vite build` | - |
 | パッケージマネージャ | `pnpm` | - |
 
 ## 状態機械の概要
