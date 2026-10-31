@@ -11,6 +11,7 @@ overrides:
   undici@7: ^7.30.1
   "@babel/core": ^7.29.6
   postcss@<8.5.18: ^8.5.18
+  "minimatch@>=10.0.0 <11.0.1": ^11.0.3
 # 7日未満の版の例外。1版ずつ書き、7日を過ぎたら消す
 minimumReleaseAgeExclude:
   - "@babel/helper-string-parser@7.29.11"
@@ -54,3 +55,5 @@ minimumReleaseAgeExclude:
   - tldts@7.4.19
   - typescript-eslint@8.72.0
   - vite@8.3.5
+  - minimatch@11.0.3
+  - "@isaacs/nonrecursive-glob-match@1.0.3"
